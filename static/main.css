@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,500,700,900&display=swap');
+
+body {
+    background-color: #ffffff;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+.btn-custom-primary {
+    background-color: black;
+    color: white;
+}
+
+.custom-primary-text {
+    color: green;
+}
+
+#NavHitchRide {
+    color: #E83D10;
+    font-size: 1.625rem; /* equivalent to 26px if the base font size is 16px */
+    font-weight: 900;
+    line-height: 1.45; /* relative line height */
+}
+
+#HomeTitle {
+    color: #E83D10;
+    font-size: 3.125rem; /* equivalent to 50px if the base font size is 16px */
+    font-weight: 500;
+    line-height: 1.32; /* relative line height */
+    letter-spacing: 0.02em; /* relative letter spacing */
+    margin-bottom: 1.25em; /* relative to the element's font size */
+}
+
+#HomeSubTitle {
+    color: var(--Colour-Main-Blue-500, #000000);
+    font-size: 1.125rem; /* equivalent to 18px if the base font size is 16px */
+    font-weight: 400;
+    line-height: 1.67; /* relative line height */
+    margin-bottom: 1.875em; /* relative to the element's font size */
+}
+
+#HomeButton {
+    color: var(--colour-secondary-white-100-general, #FFF);
+    font-size: 1rem; /* equivalent to 16px if the base font size is 16px */
+    font-weight: 700;
+    line-height: 1.625; /* relative line height */
+    margin-top: 1.25em; /* relative to the element's font size */
+    margin-bottom: 3.125em; /* relative to the element's font size */
+    padding: 0.625em 1.5625em; /* relative to the element's font size */
+    border: 2px solid transparent;
+    background-color: #000000;
+    border-radius: 0.3125em;
+    text-decoration: none;
+    display: inline-block;
+}
+
+#HomeLogo{
+    width: 50vw; /* 50% of the viewport width */
+    height: 0; /* set to 0 to start with */
+    padding-top: 50%; /* percentage relative to the width to maintain aspect ratio */
+    background: url('logo4.jpg') center center / contain no-repeat;
+    background-color: white; /* Set the background color to transparent */
+    flex-shrink: 0;
+}
+
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: white; /* or any color that matches your design */
+    color: #777777;
+    text-align: center;
+    padding: 1rem 0;
+    font-size: 0.75rem; /* equivalent to 12px if the base font size is 16px */
+    /* Add any additional styling you need here */
+  }
+
+/* ... other styles ... */
+
+.content-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* This will vertically center the text with the image */
+    justify-content: center;
+    padding: 20px;
+    gap: 20px;
+  }
+  
+  .text-container {
+    max-width: 50%;
+    order: 1; /* Order 2 will ensure the text is below the image on smaller screens */
+  }
+  
+  .image-container {
+    flex: 1;
+    order: 2; /* Order 1 will ensure the image is above the text on smaller screens */
+    /* Adjust padding-top as necessary to raise the image */
+    padding-top: calc(50vw * (714 / 732) - 0%); /* Replace X% with the value to raise the image */
+    background: url('{% static 'logo3.jpg' %}') center center / contain no-repeat;
+    background-color: #FFFFFF;
+  }
+  
+  @media screen and (max-width: 768px) {
+    .content-container {
+      flex-direction: column;
+    }
+  
+    .text-container,
+    .image-container {
+      max-width: 100%;
+      order: unset;
+    }
+  
+    .image-container {
+      padding-top: calc(100vw * (714 / 732) - 0%); /* Replace X% with the value to raise the image */
+    }
+  }
+  
+  .navbar-brand {
+    font-size: 1.75rem; /* Adjust font size as needed */
+    font-weight: bold;    /* Make the text appear bolder */
+    color: #E83D10;       /* Or any color you prefer */
+    margin-right: auto;   /* Push the brand to the left */
+  } 
+
+
