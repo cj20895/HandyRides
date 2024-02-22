@@ -6,7 +6,9 @@ from .models import Person
 from .forms import RideForm
 
 # Create your views here.
-
+def about(request):
+    # Your logic here
+    return render(request, 'about.html')
 
 def index(request):
 
