@@ -1,9 +1,12 @@
 from django.shortcuts import render
+from django.http import HttpResponseRedirect
+
 
 from .models import Person
 
 # relative import of forms
-from .forms import RideForm
+from .forms import RideForm, NewRideForm
+from django.shortcuts import redirect
 
 # Create your views here.
 def about(request):
@@ -16,12 +19,13 @@ def index(request):
   
   # Initialize variables for city and state searches
   search_city_origin = request.GET.get('search_origin', '').strip()
+  search_state_origin = request.GET.get('searchstate_origin', '').strip().upper()  # Convert to uppercase for case insensitivity
   search_city_destination = request.GET.get('search_destination', '').strip()
   search_state = request.GET.get('searchstate', '').strip().upper()  # Convert to uppercase for case insensitivity
     
   # If either city or state search is provided, filter the Person objects
 
-  if search_city_origin or search_city_destination or search_state:
+  if search_city_origin or search_state_origin or search_city_destination or search_state:
 
      # Start with all Person objects
     queryset = Person.objects.all()
@@ -29,11 +33,13 @@ def index(request):
     # Filter by city if search_city is provided
     if search_city_origin:
       queryset = queryset.filter(origination__icontains=search_city_origin) 
+
+    if search_state_origin:
+      queryset = queryset.filter(origination_state__iexact=search_state_origin)
     
     if search_city_destination:
       queryset = queryset.filter(destination_city__icontains=search_city_destination)
         
-  
     # Filter by state if search_state is provided
     if search_state:
       queryset = queryset.filter(destination_state__iexact=search_state)
@@ -81,5 +87,30 @@ def index(request):
 
 
   context["form"] = RideForm()
+  context["new_ride_form"] = NewRideForm()
 
   return render(request, "index_view.html", context)
+
+# def create(request):
+#   if request.method == "POST":
+#     new_ride = NewRideForm(request.POST)
+#     new_ride.save()
+
+#   return redirect("/rides/")
+
+def create(request):
+    if request.method == 'POST':
+        form = NewRideForm(request.POST)
+        if form.is_valid():
+            # Save the new Person object from the form's data.
+            form.save()
+            context = {}
+            context["form"] = RideForm()
+            context["new_ride_form"] = NewRideForm()
+            # After saving, redirect the user to the index page (or any other page).
+            return render(request, "index_view.html", context)  # Make sure 'index' is the name of the view you want to redirect to.
+    else:
+        form = NewRideForm()
+
+    # If this is a GET request, we'll create a blank form
+    return render(request, 'create.html', {'new_ride_form': form})

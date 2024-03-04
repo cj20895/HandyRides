@@ -3,10 +3,26 @@
 {% block content %}
 <div class="main"> 
     <table class = "mdl-data-table mdl-js-data-table mdl-data-table">
+    <thead>
+        {% if people %}
+        <tr>
+            <th>First Name</th>
+            <th>Origination City</th>
+            <th>Origination State</th>
+            <th>Destination City</th>
+            <th>Destination State</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Taking Passengers</th>
+            <th>Seats Available</th>
+        </tr>
+        {% endif %}
+    </thead>
       {% for person in people %}
       <tr>
           <td>{{ person.first_name }}</td> 
           <td>{{ person.origination }}</td>
+          <td>{{ person.origination_state }}</td> <!-- Added origin state -->
           <td>{{ person.destination_city }}</td> 
           <td>{{ person.destination_state }}</td> 
           <td>{{ person.date }}</td> 
@@ -29,7 +45,7 @@
     <!-- <input  > -->
     <!-- Colored raised button -->
 <button type="submit" value="Submit" onclick="return checkForm()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
-    Submit
+    Search
   </button>
     <!-- <button type="submit" class="button" onclick="return checkForm()">
         Submit
@@ -45,12 +61,7 @@
         <i class="fas fa-search"></i> Submit
     </button> -->
     </form>
-
 </div> 
-
-
-
-
 
 
 {% endblock %}

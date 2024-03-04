@@ -20,17 +20,18 @@ function getCookie(c_name) {
  function checkForm() {
     // Assuming there are two inputs with IDs 'input1' and 'input2'
     var input1 = document.getElementById('id_search_origin').value;
-    var input2 = document.getElementById('id_search_destination').value;
-    var input3 = document.getElementById('id_searchstate').value;
+    var input2 = document.getElementById('id_searchstate_origin').value;
+    var input3 = document.getElementById('id_search_destination').value;
+    var input4 = document.getElementById('id_searchstate').value;
 
   
-    if (input1 === '' && input2 === '' && input3 === '') {
-      // Prevent form submission if both fields are empty
+    if (input1 === '' && input2 === '' && input3 === '' && input4 === '') {
+      // Prevent form submission if all fields are empty
       alert('Please fill in the search fields.');
       return false;
     } 
     
-    else if (input1.toLowerCase() === 'elon musk' || input2.toLowerCase() === 'elon musk' || input3.toLowerCase() === 'elon musk'){
+    else if (input1.toLowerCase() === 'elon musk' || input2.toLowerCase() === 'elon musk' || input3.toLowerCase() === 'elon musk' || input4.toLowerCase() === 'elon musk') {
       // Show popup if the search is for 'Elon Musk'
       alert("He's not here.");
       return false;
