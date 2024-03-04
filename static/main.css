@@ -127,3 +127,6 @@ body {
   } 
 
 
+  .form-bottom-padding {
+    margin-bottom: 30px; /* Adjust the value as needed */
+}

@@ -2,12 +2,13 @@
 
 {% block content %}
 
-<form action="{% url 'rides:create' %}" method="post">
+<form action="{% url 'rides:create' %}" method="post" class="form-bottom-padding">
     {% csrf_token %}
     {{ new_ride_form }}
     <button type="submit" value="Submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
         Submit
     </button>
 </form>
+
 
 {% endblock %}
