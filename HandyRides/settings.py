@@ -143,4 +143,5 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 import os
 
 # Now you can safely use os.getenv to access your environment variables
-OPEN_AI_KEY = os.getenv("OPEN_AI_KEY")
+# OPEN_AI_KEY="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"
+print("KEY IS", os.getenv("OPEN_AI_KEY"))

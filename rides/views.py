@@ -2,27 +2,31 @@ from django.shortcuts import render, redirect
 from .models import Person
 from .forms import RideForm, NewRideForm
 import os
-from langchain_openai import OpenAI
-from langchain_openai import ChatOpenAI  # Import ChatOpenAI
-from dotenv import load_dotenv
-from langchain_core.messages import HumanMessage, SystemMessage
+# from langchain_openai import OpenAI
+# from langchain_openai import ChatOpenAI  # Import ChatOpenAI
+# from dotenv import load_dotenv
+# from langchain_core.messages import HumanMessage, SystemMessage
 
-from transformers import pipeline
+# from transformers import pipeline
 from .models import Person
 from django.shortcuts import render
 from django.conf import settings  # Assuming your API key is stored in Django's settings
+import openai
 from openai import OpenAI
 import json
 
 
 
 # Load environment variables from .env file.
-load_dotenv()
+# load_dotenv()
 
 # Initialize OpenAI client with API key.
-client = OpenAI(api_key=os.getenv("OPEN_AI_KEY"))
+print("api key: ", os.getenv("OPEN_AI_KEY"))
+print("okay")
+OPEN_AI_KEY = os.getenv("OPEN_AI_KEY")
+client = OpenAI(api_key=OPEN_AI_KEY)
 
-chat_client = ChatOpenAI(temperature=0, openai_api_key=os.getenv("OPEN_AI_KEY"))
+# chat_client = ChatOpenAI(temperature=0, openai_api_key=os.getenv("OPEN_AI_KEY"))
 
 
 def test(request):
@@ -100,7 +104,7 @@ def ai_interaction(request):
         # })
 
         
-        print("fuck")
+        # print("uhh")
 # Assuming AI returns JSON-like responses, or adjust parsing logic as needed
         search_city_origin = origincity_field.strip()
         print("origin city: ", search_city_origin)
@@ -371,7 +375,6 @@ def create(request):
 #         # })
 
         
-#         print("fuck")
 # # Assuming AI returns JSON-like responses, or adjust parsing logic as needed
 #         search_city_origin = origincity_field.strip()
 #         search_state_origin = originstate_field.strip().upper()
