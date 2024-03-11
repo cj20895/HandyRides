@@ -1,116 +1,405 @@
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
-
-
+from django.shortcuts import render, redirect
 from .models import Person
-
-# relative import of forms
 from .forms import RideForm, NewRideForm
-from django.shortcuts import redirect
+import os
+from langchain_openai import OpenAI
+from langchain_openai import ChatOpenAI  # Import ChatOpenAI
+from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage, SystemMessage
 
-# Create your views here.
-def about(request):
-    # Your logic here
+from transformers import pipeline
+from .models import Person
+from django.shortcuts import render
+from django.conf import settings  # Assuming your API key is stored in Django's settings
+from openai import OpenAI
+import json
+
+
+
+# Load environment variables from .env file.
+load_dotenv()
+
+# Initialize OpenAI client with API key.
+client = OpenAI(api_key=os.getenv("OPEN_AI_KEY"))
+
+chat_client = ChatOpenAI(temperature=0, openai_api_key=os.getenv("OPEN_AI_KEY"))
+
+
+def test(request):
+    # Logic for the about page.
     return render(request, 'about.html')
 
+def ai_interaction(request):
+    print("ai_interaction called")
+    context = {}
+    if request.method == 'POST':
+        user_input = request.POST.get('user_input')
+
+        # # Load your OpenAI API key from settings or environment variable
+        # openai.api_key = settings.OPEN_AI_KEY  # Or use os.getenv("OPEN_AI_KEY")
+
+        try:
+            # Make a call to the OpenAI API, specifying GPT-4 (or the appropriate engine name for GPT-4 access)
+            response = client.chat.completions.create(
+                model="gpt-4-turbo-preview",
+                # response_format={ "type": "json_object" },
+                messages=[
+                    {"role": "system", "content": "You are looking to parse the user input text and find relevant information regarding the orgination state, orgination city, destination state, destination state and print that out. Not all information may be present just return the relvant information that is present. Convert all full abbrevations of city names to the full name of the city."},
+                    {"role": "user", "content": user_input}
+                ]
+            )
+            # The last message in the response should be from the assistant, extract that message
+            ai_text = response.choices[0].message.content
+        except Exception as e:
+            ai_text = f"Error: {str(e)}"
+
+        destcity = client.chat.completions.create(
+            model="gpt-4-turbo-preview",
+            messages=[
+                {"role": "system", "content": "Based on the inputed text, parse out just the destination city if there is one. If not, return the number 0."},
+                {"role": "user", "content": ai_text}
+            ]
+        )
+
+        destcity_field = destcity.choices[0].message.content
+
+        deststate = client.chat.completions.create(
+            model="gpt-4-turbo-preview",
+            messages=[
+                {"role": "system", "content": "Based on the inputed text, parse out just the destination state if there is one and return the appropriate state abbreviation. If not, return the number 0. For example, if 'Oregon' is the state, the AI should return the abbreviation of the state 'OR'."},
+                {"role": "user", "content": ai_text}
+            ]
+        )
+
+        deststate_field = deststate.choices[0].message.content
+
+        originstate = client.chat.completions.create(
+            model="gpt-4-turbo-preview",
+            messages=[
+                {"role": "system", "content": "Based on the inputed text, parse out just the origin state if there is one and return the appropriate state abbreviation. If not, return the number 0. For example, if 'Oregon' is the state, the AI should return the abbreviation of the state 'OR'."},
+                {"role": "user", "content": ai_text}
+            ]
+        )
+
+        originstate_field = originstate.choices[0].message.content
+
+        origincity = client.chat.completions.create(
+            model="gpt-4-turbo-preview",
+            messages=[
+                {"role": "system", "content": "Based on the inputed text, parse out just the origin city if there is one. If not, return the number 0."},
+                {"role": "user", "content": ai_text}
+            ]
+        )
+
+        origincity_field = origincity.choices[0].message.content
+
+        # # Render the AI response in the template
+        # return render(request, 'index_view.html', {
+        #     'user_input': user_input,
+        #     'ai_text': origincity_field
+        # })
+
+        
+        print("fuck")
+# Assuming AI returns JSON-like responses, or adjust parsing logic as needed
+        search_city_origin = origincity_field.strip()
+        print("origin city: ", search_city_origin)
+        search_state_origin = originstate_field.strip().upper()
+        search_city_destination = destcity_field.strip()
+        search_state_destination = deststate_field.strip().upper()
+
+        search_city_origin = search_city_origin.replace("0","")
+        search_state_origin = search_state_origin.replace("0","")
+        search_city_destination = search_city_destination.replace("0","")
+        search_state_destination = search_state_destination.replace("0", "")
+
+        # # Filter Person objects based on AI-extracted search criteria
+        # queryset = Person.objects.all()
+        # if search_city_origin:
+        #     queryset = queryset.filter(origination__icontains=search_city_origin)
+        # if search_state_origin:
+        #     queryset = queryset.filter(origination_state__iexact=search_state_origin)
+        # if search_city_destination:
+        #     queryset = queryset.filter(destination_city__icontains=search_city_destination)
+        # if search_state_destination:
+        #     queryset = queryset.filter(destination_state__iexact=search_state_destination)
+
+        # context['people'] = queryset
+
+
+    context = display(search_city_origin, search_state_origin, search_city_destination, search_state_destination)
+    return render(request, "index_view.html", context)
+
+        # context = {
+        #     'people': queryset,
+        #     'form': RideForm(),
+        #     'new_ride_form': NewRideForm()
+        # }
+
+        # print("context: ", context)
+        # return render(request, "index_view.html", context)
+
+    # Include forms in the context.
+    context["form"] = RideForm()
+    context["new_ride_form"] = NewRideForm()
+    return render(request, "index_view.html", context)
+
+    # Handle non-POST requests
+    return render(request, 'index_view.html')
+
+
 def index(request):
-
-  context = {}
-  
-  # Initialize variables for city and state searches
-  search_city_origin = request.GET.get('search_origin', '').strip()
-  search_state_origin = request.GET.get('searchstate_origin', '').strip().upper()  # Convert to uppercase for case insensitivity
-  search_city_destination = request.GET.get('search_destination', '').strip()
-  search_state = request.GET.get('searchstate', '').strip().upper()  # Convert to uppercase for case insensitivity
+    print("searched")
+    context = {}
+    # Retrieve search parameters.
     
-  # If either city or state search is provided, filter the Person objects
-
-  if search_city_origin or search_state_origin or search_city_destination or search_state:
-
-     # Start with all Person objects
-    queryset = Person.objects.all()
-        
-    # Filter by city if search_city is provided
-    if search_city_origin:
-      queryset = queryset.filter(origination__icontains=search_city_origin) 
-
-    if search_state_origin:
-      queryset = queryset.filter(origination_state__iexact=search_state_origin)
-    
-    if search_city_destination:
-      queryset = queryset.filter(destination_city__icontains=search_city_destination)
-        
-    # Filter by state if search_state is provided
-    if search_state:
-      queryset = queryset.filter(destination_state__iexact=search_state)
-        
-    # Update the context with the filtered queryset
-    context['people'] = queryset
+    search_city_origin = request.GET.get('search_origin', '').strip().replace("0", "")
+    print("search city origin: ", search_city_origin)
+    search_state_origin = request.GET.get('searchstate_origin', '').strip().upper().replace("0", "")
+    search_city_destination = request.GET.get('search_destination', '').strip().replace("0", "")
+    search_state_destination = request.GET.get('searchstate_destination', '').strip().upper().replace("0", "")
 
 
-  '''
-  if "search" in request.GET or "search2" in request.GET:
+    context = display(search_city_origin, search_state_origin, search_city_destination, search_state_destination)
+    # # Filter Person objects based on search criteria.
+    # if any([search_city_origin, search_state_origin, search_city_destination, search_state_destination]):
+    #     queryset = Person.objects.all()
+    #     if search_city_origin:
+    #         queryset = queryset.filter(origination__icontains=search_city_origin)
+    #     if search_state_origin:
+    #         queryset = queryset.filter(origination_state__iexact=search_state_origin)
+    #     if search_city_destination:
+    #         queryset = queryset.filter(destination_city__icontains=search_city_destination)
+    #     if search_state_destination:
+    #         queryset = queryset.filter(destination_state__iexact=search_state_destination)
+    #     context['people'] = queryset
 
-    # Get the city and remove white spaces
-    search = request.GET.get('search', '').strip()
+    # # Include forms in the context.
+    # context["form"] = RideForm()
+    # context["new_ride_form"] = NewRideForm()
+    return render(request, "index_view.html", context)
 
-    # Get the state and remove white spaces, convert to upper case
-    search2 = request.GET.get('search2', '').strip().upper()
-
-    people = Person.objects.all()
-
-    # Search by city if given
-    if search:
-      people = people.filter(destination_city__icontains=search)
-
-    # Search by state if given
-    if search2:
-      people = people.filter(destination_state__icontains=search2)
-
-    context['people'] = people 
-  '''
-  
-  '''
-  if "search" in request.GET:
-    search = request.GET["search"]
-
-    context["people"] = Person.objects.filter(
-        origination__icontains=search) | Person.objects.filter(destination_city__icontains=search)
-
-  if "searchstate" in request.GET:
-    search2 = request.GET['searchstate'].upper()
-
-    context["people"] = Person.objects.filter(
-        destination_state__icontains=search2)
-
-  '''
+def display(search_city_origin, search_state_origin, search_city_destination, search_state_destination):
+    context = {}
+    print("line break")
+    print(search_city_destination, search_state_destination, search_city_origin, search_state_origin)
+    if any([search_city_origin, search_state_origin, search_city_destination, search_state_destination]):
+        queryset = Person.objects.all()
+        if search_city_origin:
+            queryset = queryset.filter(origination__icontains=search_city_origin)
+        if search_state_origin:
+            queryset = queryset.filter(origination_state__iexact=search_state_origin)
+        if search_city_destination:
+            queryset = queryset.filter(destination_city__icontains=search_city_destination)
+        if search_state_destination:
+            queryset = queryset.filter(destination_state__iexact=search_state_destination)
+        context['people'] = queryset
 
 
-  context["form"] = RideForm()
-  context["new_ride_form"] = NewRideForm()
-
-  return render(request, "index_view.html", context)
-
-# def create(request):
-#   if request.method == "POST":
-#     new_ride = NewRideForm(request.POST)
-#     new_ride.save()
-
-#   return redirect("/rides/")
+    # Include forms in the context.
+    context["form"] = RideForm()
+    context["new_ride_form"] = NewRideForm()
+    return context
 
 def create(request):
     if request.method == 'POST':
         form = NewRideForm(request.POST)
         if form.is_valid():
-            # Save the new Person object from the form's data.
             form.save()
-            context = {}
-            context["form"] = RideForm()
-            context["new_ride_form"] = NewRideForm()
-            # After saving, redirect the user to the index page (or any other page).
-            return render(request, "index_view.html", context)  # Make sure 'index' is the name of the view you want to redirect to.
+            return redirect('index')  # Ensure this redirects to your intended view.
     else:
         form = NewRideForm()
-
-    # If this is a GET request, we'll create a blank form
     return render(request, 'create.html', {'new_ride_form': form})
+
+# def ai_interaction(request):
+#     if request.method == 'POST':
+#         input_text = request.POST.get('user_input')
+#         response = client.completions(prompt=input_text, temperature=0.8)
+
+#         ai_text = response.choices[0].text if response.choices else "No response"
+#         return render(request, 'ai_interaction.html', {'user_input': input_text, 'ai_text': ai_text})
+#     return render(request, 'ai_interaction.html')
+# def ai_interaction(request):
+#     if request.method == 'POST':
+#         input_text = request.POST.get('user_input')
+        
+#         try:
+#             # Simulated call to the OpenAI client. Adjust according to the actual API.
+#             response = client.make_request("completions", data={
+#                 "prompt": input_text,
+#                 "temperature": 0.8,
+#                 # Add other necessary parameters as per the OpenAI API requirements
+#             })
+#             # Extracting AI text response
+#             ai_text = response['choices'][0]['text'] if response.get('choices') else "No response"
+            
+#             # Printing the AI response to the console
+#             print("AI Response:", ai_text)
+#         except AttributeError as e:
+#             ai_text = "Error: " + str(e)
+#             print(ai_text)
+        
+#         # Rendering the response in the template
+#         return render(request, 'ai_interaction.html', {'user_input': input_text, 'ai_text': ai_text})
+
+#     # Handling GET request or other methods
+#     return render(request, 'ai_interaction.html')
+
+# def ai_interaction(request):
+#     if request.method == 'POST':
+#         input_text = request.POST.get('user_input')
+
+#         # Prepare the messages list with the HumanMessage
+#         messages = [HumanMessage(content=input_text)]
+
+#         # Attempt to get a response from the ChatOpenAI client
+#         try:
+#             response_messages = chat_client.invoke(messages)
+#             # Assuming the response is a list of message objects, get the last one
+#             ai_message = response_messages[-1] if response_messages else None
+#             ai_text = ai_message.content if ai_message else "No response"
+#         except Exception as e:
+#             ai_text = f"Error: {str(e)}"
+
+#         # Render the AI response in the template
+#         return render(request, 'ai_interaction.html', {
+#             'user_input': input_text, 
+#             'ai_text': ai_text
+#         })
+
+#     # Handling GET request or other methods
+#     return render(request, 'ai_interaction.html')
+# def ai_interaction(request):
+#     if request.method == 'POST':
+#         user_input = request.POST.get('user_input')
+
+#         # # Load your OpenAI API key from settings or environment variable
+#         # openai.api_key = settings.OPEN_AI_KEY  # Or use os.getenv("OPEN_AI_KEY")
+
+#         try:
+#             # Make a call to the OpenAI API, specifying GPT-4 (or the appropriate engine name for GPT-4 access)
+#             response = client.chat.completions.create(
+#                 model="gpt-4-turbo-preview",
+#                 prompt=user_input,
+#                 max_tokens=100,  # Adjust based on your needs
+#                 n=1,  # Number of completions to generate
+#                 stop=None,  # You can specify stopping criteria if needed
+#                 temperature=0.7  # Adjust creativity
+#             )
+#             # Extracting the text from the response
+#             ai_text = response.choices[0].text.strip()
+#         except Exception as e:
+#             ai_text = f"Error: {str(e)}"
+
+#         # Render the AI response in the template
+#         return render(request, 'ai_interaction.html', {
+#             'user_input': user_input,
+#             'ai_text': ai_text
+#         })
+
+#     # Handle non-POST requests
+#     return render(request, 'ai_interaction.html')
+
+# def ai_interaction(request):
+#     print("ai_interaction called")
+#     context = {}
+#     if request.method == 'POST':
+#         user_input = request.POST.get('user_input')
+
+#         # # Load your OpenAI API key from settings or environment variable
+#         # openai.api_key = settings.OPEN_AI_KEY  # Or use os.getenv("OPEN_AI_KEY")
+
+#         try:
+#             # Make a call to the OpenAI API, specifying GPT-4 (or the appropriate engine name for GPT-4 access)
+#             response = client.chat.completions.create(
+#                 model="gpt-4-turbo-preview",
+#                 # response_format={ "type": "json_object" },
+#                 messages=[
+#                     {"role": "system", "content": "You are looking to parse the user input text and find relevant information regarding the orgination state, orgination city, destination state, destination state and print that out. Not all information may be present just return the relvant information that is present. Convert all full abbrevations of city names to the full name of the city."},
+#                     {"role": "user", "content": user_input}
+#                 ]
+#             )
+#             # The last message in the response should be from the assistant, extract that message
+#             ai_text = response.choices[0].message.content
+#         except Exception as e:
+#             ai_text = f"Error: {str(e)}"
+
+#         destcity = client.chat.completions.create(
+#             model="gpt-4-turbo-preview",
+#             messages=[
+#                 {"role": "system", "content": "Based on the inputed text, parse out just the destination city if there is one. If not, return the number 0."},
+#                 {"role": "user", "content": ai_text}
+#             ]
+#         )
+
+#         destcity_field = destcity.choices[0].message.content
+
+#         deststate = client.chat.completions.create(
+#             model="gpt-4-turbo-preview",
+#             messages=[
+#                 {"role": "system", "content": "Based on the inputed text, parse out just the destination state if there is one. If not, return the number 0."},
+#                 {"role": "user", "content": ai_text}
+#             ]
+#         )
+
+#         deststate_field = deststate.choices[0].message.content
+
+#         originstate = client.chat.completions.create(
+#             model="gpt-4-turbo-preview",
+#             messages=[
+#                 {"role": "system", "content": "Based on the inputed text, parse out just the origin state if there is one. If not, return the number 0."},
+#                 {"role": "user", "content": ai_text}
+#             ]
+#         )
+
+#         originstate_field = originstate.choices[0].message.content
+
+#         origincity = client.chat.completions.create(
+#             model="gpt-4-turbo-preview",
+#             messages=[
+#                 {"role": "system", "content": "Based on the inputed text, parse out just the origin city if there is one. If not, return the number 0."},
+#                 {"role": "user", "content": ai_text}
+#             ]
+#         )
+
+#         origincity_field = origincity.choices[0].message.content
+
+#         # # Render the AI response in the template
+#         # return render(request, 'index_view.html', {
+#         #     'user_input': user_input,
+#         #     'ai_text': origincity_field
+#         # })
+
+        
+#         print("fuck")
+# # Assuming AI returns JSON-like responses, or adjust parsing logic as needed
+#         search_city_origin = origincity_field.strip()
+#         search_state_origin = originstate_field.strip().upper()
+#         search_city_destination = destcity_field.strip()
+#         search_state_destination = deststate_field.strip().upper()
+
+#         # Filter Person objects based on AI-extracted search criteria
+#         queryset = Person.objects.all()
+#         if search_city_origin and search_city_origin != "0":
+#             queryset = queryset.filter(origination__icontains=search_city_origin)
+#         if search_state_origin and search_state_origin != "0":
+#             queryset = queryset.filter(origination_state__iexact=search_state_origin)
+#         if search_city_destination and search_city_destination != "0":
+#             queryset = queryset.filter(destination_city__icontains=search_city_destination)
+#         if search_state_destination and search_state_destination != "0":
+#             queryset = queryset.filter(destination_state__iexact=search_state_destination)
+        
+#         context = {
+#             'people': queryset,
+#             'form': RideForm(),
+#             'new_ride_form': NewRideForm()
+#         }
+#         return render(request, "index_view.html", context)
+
+#     # Include forms in the context.
+#     context["form"] = RideForm()
+#     context["new_ride_form"] = NewRideForm()
+#     return render(request, "index_view.html", context)
+
+#     # Handle non-POST requests
+#     return render(request, 'index_view.html')
