@@ -141,11 +141,11 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # settings.py
 
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-# Load environment variables from '.env' file
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-load_dotenv(dotenv_path)
+# # Load environment variables from '.env' file
+# dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+# load_dotenv(dotenv_path)
 
 # Now you can safely use os.getenv to access your environment variables
 OPEN_AI_KEY = os.getenv("OPEN_AI_KEY")
