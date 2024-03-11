@@ -206,7 +206,7 @@ def create(request):
         form = NewRideForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('index')  # Ensure this redirects to your intended view.
+            return redirect('/rides')  # Ensure this redirects to your intended view.
     else:
         form = NewRideForm()
     return render(request, 'create.html', {'new_ride_form': form})

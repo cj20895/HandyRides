@@ -65,6 +65,24 @@ body {
     flex-shrink: 0;
 }
 
+#Aneesh{
+  width: 40vw; /* 50% of the viewport width */
+  height: 0; /* set to 0 to start with */
+  padding-top: 70%; /* percentage relative to the width to maintain aspect ratio */
+  background: url('aneesh.jpg') center center / contain no-repeat;
+  background-color: white; /* Set the background color to transparent */
+  flex-shrink: 0;
+}
+
+#Jimmy{
+  width: 40vw; /* 50% of the viewport width */
+  height: 0; /* set to 0 to start with */
+  padding-top: 70%; /* percentage relative to the width to maintain aspect ratio */
+  background: url('Jimmy.jpg') center center / contain no-repeat;
+  background-color: white; /* Set the background color to transparent */
+  flex-shrink: 0;
+}
+
 .footer {
     position: fixed;
     left: 0;
@@ -81,52 +99,88 @@ body {
 /* ... other styles ... */
 
 .content-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* This will vertically center the text with the image */
+  justify-content: space-between;
+  padding: 20px;
+  gap: 100px;
+}
+
+.text-container {
+  max-width: 40%; /* Adjusted for readability, consider your content needs */
+  order: 1; /* Order 2 will ensure the text is below the image on smaller screens */
+}
+
+.image-container {
+  flex: 1;
+  order: 2; /* Order 1 will ensure the image is above the text on smaller screens */
+  padding-top: calc(40vw * (714 / 732)); /* Adjusted, remove '- 0%' for simplicity */
+  /* background: url('{% static 'logo1.jpg' %}') center center / contain no-repeat; */
+  background-color: #FFFFFF;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 20px;
+}
+
+
+.mdl-textfield.is-focused .mdl-textfield__label,
+.mdl-textfield.is-dirty .mdl-textfield__label {
+    top: -30px; /* or any value that works better for your layout */
+}
+
+
+@media screen and (max-width: 768px) {
+  #Aneesh{
+    width: 100vw; /* 50% of the viewport width */
+    height: 0; /* set to 0 to start with */
+    padding-top: 70%; /* percentage relative to the width to maintain aspect ratio */
+    background: url('aneesh.jpg') center center / contain no-repeat;
+    background-color: white; /* Set the background color to transparent */
+    flex-shrink: 0;
+  }
+  
+  #Jimmy{
+    width: 100vw; /* 50% of the viewport width */
+    height: 0; /* set to 0 to start with */
+    padding-top: 70%; /* percentage relative to the width to maintain aspect ratio */
+    background: url('Jimmy.jpg') center center / contain no-repeat;
+    background-color: white; /* Set the background color to transparent */
+    flex-shrink: 0;
+  }
+
+  .content-container {
     display: flex;
-    flex-direction: row;
-    align-items: center; /* This will vertically center the text with the image */
-    justify-content: center;
-    padding: 20px;
-    gap: 20px;
+    justify-content: space-between;
+    flex-direction: column;
+    gap: 1px;
   }
-  
+
   .text-container {
-    max-width: 50%;
-    order: 1; /* Order 2 will ensure the text is below the image on smaller screens */
+    max-width: 100%;
+    order: 2;
   }
-  
+
   .image-container {
-    flex: 1;
-    order: 2; /* Order 1 will ensure the image is above the text on smaller screens */
-    /* Adjust padding-top as necessary to raise the image */
-    padding-top: calc(50vw * (714 / 732) - 0%); /* Replace X% with the value to raise the image */
-    background: url('{% static 'logo3.jpg' %}') center center / contain no-repeat;
-    background-color: #FFFFFF;
+    max-width: 100%;
+    order: 1;
   }
-  
-  @media screen and (max-width: 768px) {
-    .content-container {
-      flex-direction: column;
-    }
-  
-    .text-container,
-    .image-container {
-      max-width: 100%;
-      order: unset;
-    }
-  
-    .image-container {
-      padding-top: calc(100vw * (714 / 732) - 0%); /* Replace X% with the value to raise the image */
-    }
+
+  .image-container {
+    padding-top: calc(10vw * (714 / 732)); /* Adjusted for media query */
   }
-  
-  .navbar-brand {
-    font-size: 1.75rem; /* Adjust font size as needed */
-    font-weight: bold;    /* Make the text appear bolder */
-    color: #E83D10;       /* Or any color you prefer */
-    margin-right: auto;   /* Push the brand to the left */
-  } 
+}
 
+.navbar-brand {
+  font-size: 1.75rem; /* Adjust font size as needed */
+  font-weight: bold;    /* Make the text appear bolder */
+  color: #E83D10;       /* Or any color you prefer */
+  margin-right: auto;   /* Push the brand to the left */
+}
 
-  .form-bottom-padding {
-    margin-bottom: 30px; /* Adjust the value as needed */
+.form-bottom-padding {
+  margin-bottom: 1px; /* Adjust the value as needed */
 }
