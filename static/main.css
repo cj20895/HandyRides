@@ -78,7 +78,7 @@ body {
   width: 40vw; /* 50% of the viewport width */
   height: 0; /* set to 0 to start with */
   padding-top: 70%; /* percentage relative to the width to maintain aspect ratio */
-  background: url('Jimmy.jpg') center center / contain no-repeat;
+  background: url('jimmy.jpg') center center / contain no-repeat;
   background-color: white; /* Set the background color to transparent */
   flex-shrink: 0;
 }

@@ -11,7 +11,6 @@ import os
 from .models import Person
 from django.shortcuts import render
 from django.conf import settings  # Assuming your API key is stored in Django's settings
-import openai
 from openai import OpenAI
 import json
 
