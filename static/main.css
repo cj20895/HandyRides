@@ -116,7 +116,6 @@ body {
   flex: 1;
   order: 2; /* Order 1 will ensure the image is above the text on smaller screens */
   padding-top: calc(40vw * (714 / 732)); /* Adjusted, remove '- 0%' for simplicity */
-  /* background: url('{% static 'logo1.jpg' %}') center center / contain no-repeat; */
   background-color: #FFFFFF;
 }
 
